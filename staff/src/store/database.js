@@ -34,7 +34,9 @@ const createTables = (database) => {
 
 const database = new sqlite3.Database("staff.db", (err) => {
   if (err) {
-    console.log("Getting databse error " + err);
+    if (err) {
+      throw Error(`Getting connecting to database ${err}`);
+    }
   }
   createTables(database);
 });

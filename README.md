@@ -33,11 +33,44 @@ git clone https://github.com/machelslack/api-with-sqlite.git
 
 git@github.com:machelslack/api-with-sqlite.git
 
+from the root of the project cd into the staff directory
+
+```
+cd staff
+
+```
+
+when in directory staff run npm install to install the project dependencies
+
+```
+npm install
+
+```
+
+start the node server by executing command npm run start
+
+```
+npm run start
+
+```
+
 ### Running a container using a Docker image
 
 From the root of the project cd into staff directory.
 
-There run command docker compose up.
+First you will need to build the image using the below command
+
+```
+docker compose build
+
+```
+
+Then you will need to start you contain with the new image by running the below command
+
+```
+docker compose up
+
+```
 
 Which will create and start a container using the app image built from the definitions in Dockerfile.
 
