@@ -3,15 +3,11 @@ let jsonData = require("./data.json");
 
 const { dataSet } = jsonData;
 
-const addRecord = ({
-  name,
-  salary,
-  currency,
-  on_contract,
-  department,
-  sub_department,
-}) => {
-  databaseInstance.run(
+const addRecord = (
+  { name, salary, currency, on_contract, department, sub_department },
+  database
+) => {
+  database.run(
     `INSERT INTO Staff VALUES (null,"${name}","${salary}","${currency}","${on_contract}","${department}","${sub_department}")`
   );
 };
@@ -24,7 +20,7 @@ const createTables = (database) => {
       if (err) {
         console.log("Getting create table error " + err);
       }
-      dataSet.forEach((record) => addRecord({ ...record }));
+      dataSet.forEach((record) => addRecord({ ...record }, database));
     }
   );
 };
@@ -36,4 +32,7 @@ const database = new sqlite3.Database("staff.db", (err) => {
   createTables(database);
 });
 
-module.exports = database;
+module.exports = {
+  database,
+  addRecord,
+};
