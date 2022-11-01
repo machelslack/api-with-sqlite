@@ -1,9 +1,6 @@
 const express = require("express");
 const { database, addRecord } = require("../store/database");
-const {
-  getSummaryStatBySubDepartments,
-  buildJsonReponse,
-} = require("../helpers");
+const { buildJsonReponse } = require("../helpers");
 
 const router = express.Router();
 
@@ -39,11 +36,11 @@ const deleteRecord = (staffId) =>
   new Promise((resolve, reject) => {
     database.run(
       `DELETE FROM Staff WHERE id = ${staffId}`,
-      function (err, rows) {
+      function (err, records) {
         if (err) {
           reject(err);
         }
-        resolve({ message: `${this.changes} row deleted`, rows });
+        resolve({ message: `${this.changes} row deleted`, records });
       }
     );
   });
@@ -52,11 +49,11 @@ const getSumStatsByContract = () => {
   return new Promise((resolve, reject) => {
     database.all(
       "SELECT on_contract, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY on_contract",
-      (err, rows) => {
+      (err, records) => {
         if (err) {
           reject(err);
         }
-        resolve({ rows });
+        resolve({ records });
       }
     );
   });
@@ -66,24 +63,42 @@ const getSumStatsByDepartment = () => {
   return new Promise((resolve, reject) => {
     database.all(
       "SELECT department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY department",
-      (err, rows) => {
+      (err, records) => {
         if (err) {
           reject(err);
         }
-        resolve({ rows });
+        resolve({ records });
       }
     );
   });
 };
 
-const getSummaryAllSalaries = () => {
+const getSumStatsBySubDepartment = () => {
   return new Promise((resolve, reject) => {
-    database.all("SELECT * FROM Staff", (err, rows) => {
-      if (err) {
-        reject(err);
+    database.all(
+      "SELECT department, sub_department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY sub_department",
+      (err, records) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({
+          records: records.map((row) => {
+            const {
+              department = `${department}`,
+              sub_department,
+              ...rest
+            } = row;
+            return {
+              department: department,
+              sub_department: {
+                name: sub_department,
+                ...rest,
+              },
+            };
+          }),
+        });
       }
-      resolve({ rows });
-    });
+    );
   });
 };
 
@@ -91,8 +106,8 @@ router.get("/statistics/:facet", async function (req, res) {
   const facet = req.params.facet;
   if (facet === "on_contract") {
     await getSumStatsByContract()
-      .then(({ message, rows }) => {
-        buildJsonReponse({ res, body: rows, message });
+      .then(({ records }) => {
+        buildJsonReponse({ res, body: records });
       })
       .catch((err) => {
         buildJsonReponse({
@@ -105,8 +120,8 @@ router.get("/statistics/:facet", async function (req, res) {
 
   if (facet === "department") {
     await getSumStatsByDepartment()
-      .then(({ message, rows }) => {
-        buildJsonReponse({ res, body: rows, message });
+      .then(({ records }) => {
+        buildJsonReponse({ res, body: records });
       })
       .catch((err) => {
         buildJsonReponse({
@@ -118,12 +133,11 @@ router.get("/statistics/:facet", async function (req, res) {
   }
 
   if (facet === "sub_department") {
-    await getSummaryAllSalaries()
-      .then(({ message, rows }) => {
+    await getSumStatsBySubDepartment()
+      .then(({ records }) => {
         buildJsonReponse({
           res,
-          body: getSummaryStatBySubDepartments(rows),
-          message,
+          body: records,
         });
       })
       .catch((err) => {
@@ -149,8 +163,8 @@ router.post("/", async function (req, res) {
   }
 
   await addRecord({ ...body }, database)
-    .then(({ message, rows }) => {
-      buildJsonReponse({ res, body: rows, message });
+    .then(({ message, records }) => {
+      buildJsonReponse({ res, body: records, message });
     })
     .catch((err) => {
       buildJsonReponse({
@@ -171,8 +185,8 @@ router.delete("/:staffId", async function (req, res) {
 
   if (req.method === "DELETE") {
     await deleteRecord(staffId)
-      .then(({ message, rows }) => {
-        buildJsonReponse({ res, body: rows, message });
+      .then(({ message, records }) => {
+        buildJsonReponse({ res, body: records, message });
       })
       .catch((err) => {
         buildJsonReponse({

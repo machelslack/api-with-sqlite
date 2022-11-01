@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/", indexRouter);
-app.use("/api/users", authenticateToken, usersRouter);
+app.use("/api/users", usersRouter);
 app.use("/api/staff", authenticateToken, staffRouter);
 
 module.exports = app;

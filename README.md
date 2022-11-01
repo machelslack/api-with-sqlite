@@ -205,6 +205,9 @@ curl --location --request GET 'http://localhost:3000/api/staff/statistics/sub_de
 --header 'token: << your api token >>' \
 ```
 
+using POSTMAN
+![](./staff/public/images/how-to-get-staff-stats-by-sub_department.jpg)
+
 Expected Output Format:
 
 ```json
@@ -221,9 +224,6 @@ Expected Output Format:
   }
 }
 ```
-
-using POSTMAN
-![](./staff/public/images/how-to-get-salary-stats-by-department.jpg)
 
 ```
 
