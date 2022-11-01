@@ -24,15 +24,6 @@ let mocks = {
 process.env.TOKEN_SECRET = mocks.TOKEN_SECRET;
 
 describe("User Api Route", () => {
-  describe.skip("Get Route", () => {
-    it("should return 200 status code ", async () => {
-      const res = await request(app).get("/");
-      expect(res.header["content-type"]).toBe("text/plain; charset=utf-8");
-      expect(res.statusCode).toBe(200);
-      expect(res.text).toEqual("respond with a resource");
-    });
-  });
-
   describe.skip("Post Route", () => {
     let res;
     beforeAll(async () => {

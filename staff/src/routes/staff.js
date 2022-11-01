@@ -1,27 +1,62 @@
 const express = require("express");
 const { database, addRecord } = require("../store/database");
+const {
+  getSummaryStatBySubDepartments,
+  buildJsonReponse,
+} = require("../helpers");
 
 const router = express.Router();
 
-const deleteRecord = (staffId) =>
-  database.run(`DELETE FROM Staff WHERE id = ${staffId}`);
+const validateBody = (body) => {
+  if (!("name" in body)) {
+    return [false];
+  }
 
-const buildReponse = ({ res, rows }) => [
-  /**
-   * do something
-   */
-];
+  if (!("salary" in body)) {
+    return [false];
+  }
+
+  if (!("currency" in body)) {
+    return [false];
+  }
+
+  if (!("on_contract" in body)) {
+    return [false];
+  }
+
+  if (!("department" in body)) {
+    return [false];
+  }
+
+  if (!("sub_department" in body)) {
+    return [false];
+  }
+
+  return [true];
+};
+
+const deleteRecord = (staffId) =>
+  new Promise((resolve, reject) => {
+    database.run(
+      `DELETE FROM Staff WHERE id = ${staffId}`,
+      function (err, rows) {
+        if (err) {
+          reject(err);
+        }
+        resolve({ message: `${this.changes} row deleted`, rows });
+      }
+    );
+  });
 
 const getSumStatsByContract = () => {
   return new Promise((resolve, reject) => {
-    database.get(
-      "SELECT name, on_contract, AVG(salary), MIN(salary), Max(salary) FROM Staff GROUP BY on_contract",
+    database.all(
+      "SELECT on_contract, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY on_contract",
       (err, rows) => {
         if (err) {
-          console.log("Fetching rows error " + err);
           reject(err);
         }
-        resolve(rows);
+        resolve({ rows });
       }
     );
   });
@@ -29,77 +64,122 @@ const getSumStatsByContract = () => {
 
 const getSumStatsByDepartment = () => {
   return new Promise((resolve, reject) => {
-    database.get(
-      "SELECT department, AVG(salary), MIN(salary), Max(salary) FROM Staff GROUP BY department",
+    database.all(
+      "SELECT department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY department",
       (err, rows) => {
         if (err) {
-          console.log("Fetching rows error " + err);
           reject(err);
         }
-        resolve(rows);
+        resolve({ rows });
       }
     );
   });
 };
 
+const getSummaryAllSalaries = () => {
+  return new Promise((resolve, reject) => {
+    database.all("SELECT * FROM Staff", (err, rows) => {
+      if (err) {
+        reject(err);
+      }
+      resolve({ rows });
+    });
+  });
+};
+
 router.get("/statistics/:facet", async function (req, res) {
   const facet = req.params.facet;
-
   if (facet === "on_contract") {
     await getSumStatsByContract()
-      .then((rows) => {
-        buildReponse({ res, rows });
+      .then(({ message, rows }) => {
+        buildJsonReponse({ res, body: rows, message });
       })
       .catch((err) => {
-        res.status(500).send(JSON.stringify(err));
+        buildJsonReponse({
+          error: `Internal Server Error - ${err}`,
+          status: 500,
+          res,
+        });
       });
   }
 
   if (facet === "department") {
     await getSumStatsByDepartment()
-      .then((rows) => {
-        buildReponse({ res, rows });
+      .then(({ message, rows }) => {
+        buildJsonReponse({ res, body: rows, message });
       })
       .catch((err) => {
-        res.status(500).send(JSON.stringify(err));
+        buildJsonReponse({
+          error: `Internal Server Error - ${err}`,
+          status: 500,
+          res,
+        });
+      });
+  }
+
+  if (facet === "sub_department") {
+    await getSummaryAllSalaries()
+      .then(({ message, rows }) => {
+        buildJsonReponse({
+          res,
+          body: getSummaryStatBySubDepartments(rows),
+          message,
+        });
+      })
+      .catch((err) => {
+        buildJsonReponse({
+          error: `Internal Server Error - ${err}`,
+          status: 500,
+          res,
+        });
       });
   }
 });
 
-router.get("/", async function (req, res) {
-  res.set("content-type", "application/json");
+router.post("/", async function (req, res) {
   let body = req.body;
-
-  console.log("Validating body...");
 
   const [valid] = validateBody(body);
 
+  console.log("Validating body...");
+
   if (!valid) {
-    console.error("body missing name", body);
-    res.status(400);
-    res.json({ error: "invalid body" });
+    buildJsonReponse({ error: "Bad Request", status: 400, res });
     return;
   }
 
-  if (req.method === "POST") {
-    console.log("HERE");
-    await addRecord({ ...body }, database)
-      .then((rows) => {
-        buildReponse({ res, rows });
-      })
-      .catch((err) => {
-        res.status(500).send(JSON.stringify(err));
+  await addRecord({ ...body }, database)
+    .then(({ message, rows }) => {
+      buildJsonReponse({ res, body: rows, message });
+    })
+    .catch((err) => {
+      buildJsonReponse({
+        error: `Internal Server Error - ${err}`,
+        status: 500,
+        res,
       });
+    });
+});
+
+router.delete("/:staffId", async function (req, res) {
+  const { staffId } = req.params;
+
+  if (!staffId) {
+    buildJsonReponse({ error: `Bad Request`, status: 400, res });
+    return;
   }
 
   if (req.method === "DELETE") {
-    const { staffId } = req.params;
     await deleteRecord(staffId)
-      .then((rows) => {
-        buildReponse({ res, rows });
+      .then(({ message, rows }) => {
+        buildJsonReponse({ res, body: rows, message });
       })
       .catch((err) => {
-        res.status(500).send(JSON.stringify(err));
+        buildJsonReponse({
+          error: `Internal Server Error - ${err}`,
+          status: 500,
+          res,
+        });
       });
   }
 });

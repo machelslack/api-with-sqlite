@@ -1,26 +1,37 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const { buildJsonReponse } = require("../helpers");
 
 dotenv.config();
 
 const router = express.Router();
 
+const validateBody = (body) => {
+  if (!("username" in body)) {
+    return [false];
+  }
+
+  return [true];
+};
+
 const generateAccessToken = (username) =>
   jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: "1800s" });
 
-/* GET users listing. */
-router.get("/", function (req, res, next) {
-  res.status(200);
-  res.setHeader("content-type", "text/plain");
-  res.send("respond with a resource");
-});
-
 router.post("/", function (req, res, next) {
-  res.status(200);
-  res.set("content-type", "application/json");
+  let body = req.body;
+
+  const [valid] = validateBody(body);
+
+  console.log("Validating body...", JSON.stringify(body));
+
+  if (!valid) {
+    buildJsonReponse({ error: "Bad Request", status: 400, res });
+    return;
+  }
+
   const token = generateAccessToken({ username: req.body.username });
-  res.json(token);
+  buildJsonReponse({ body: { token }, res });
 });
 
 module.exports = router;
