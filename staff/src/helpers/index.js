@@ -3,12 +3,7 @@ const _ = require("lodash");
 const buildJsonReponse = ({ error, status = 200, res, body, message }) => {
   res.set("content-type", "application/json");
   res.status(status);
-
-  if (error) {
-    res.json({ error: error, message });
-  } else {
-    res.json({ message, body });
-  }
+  res.json({ error, message, body });
 };
 
 const getStats = (salaries) => ({
