@@ -68,6 +68,9 @@ The app exposes 6 endpoints which can either be tested using CLI utility [curl](
    -d "username=value"
   ```
 
+  using POSTMAN
+  ![](./staff/public/images/how-to-add-user.jpg)
+
   Expected Output:
 
   ```json
@@ -77,11 +80,6 @@ The app exposes 6 endpoints which can either be tested using CLI utility [curl](
     }
   }
   ```
-
-  using POSTMAN
-  ![](./images/local-response.png)
-  Expected Output:
-  ![](./images/local-response.png)
 
 - A `POST` on `/api/staff` expects a x-www-form-urlencoded body containing the staff values to enter into the database
 
@@ -97,6 +95,9 @@ The app exposes 6 endpoints which can either be tested using CLI utility [curl](
   --data-urlencode 'on_contract=<< true or false>>'
   ```
 
+  using POSTMAN
+  ![](./staff/public/images/how-to-add-a-new-staff-record.jpg)
+
   Expected Output:
 
   ```json
@@ -105,17 +106,15 @@ The app exposes 6 endpoints which can either be tested using CLI utility [curl](
   }
   ```
 
-  using POSTMAN
-  ![](./images/local-response.png)
-  Expected Output:
-  ![](./images/local-response.png)
-
 - A `DELETE` on `/api/staff/<<staff-id>>` expects a url containing the id of the staff to delete
 
   ```
   curl --location --request DELETE 'http://localhost:3001/api/staff/1' \
   --header 'token: << your api token >>'
   ```
+
+  using POSTMAN
+  ![](./staff/public/images/how-to-delete-staff-by-id.jpg)
 
   Expected Output:
 
@@ -125,11 +124,6 @@ The app exposes 6 endpoints which can either be tested using CLI utility [curl](
   }
   ```
 
-  using POSTMAN
-  ![](./images/local-response.png)
-  Expected Output:
-  ![](./images/local-response.png)
-
   - A `GET` on `/statistics/on_contract` which returns a json object of mean min and max salaries of on contract staff grouped by department
 
   ```
@@ -137,105 +131,99 @@ The app exposes 6 endpoints which can either be tested using CLI utility [curl](
   --header 'token: << your api token >>' \
   ```
 
-  Expected Output:
+using POSTMAN
+![](./staff/public/images/how-get-staff-salary-stats-by-contract.jpg)
 
-  ```json
-  {
-    "body": [
-        {
-            "on_contract": "false",
-            "AVG(salary)": <<some value>>,
-            "MIN(salary)": <<some value>>,
-            "MAX(salary)": <<some value>>,
-        },
-        {
-            "on_contract": "true",
-            "AVG(salary)": <<some value>>,
-            "MIN(salary)": <<some value>>,
-            "MAX(salary)": <<some value>>,
-        }
-    ]
-  }
-  ```
+Expected Output:
 
-  using POSTMAN
-  ![](./images/local-response.png)
-  Expected Output:
-  ![](./images/local-response.png)
-
-  - A `GET` on `/statistics/department` which returns a json object of mean min and max salaries grouped by department
-
-  ```
-   curl --location --request GET 'http://localhost:3000/api/staff/statistics/department' \
-  --header 'token: << your api token >>' \
-  ```
-
-  Expected Output:
-
-  ```json
-  {
-    "body": [
+```json
+{
+  "body": [
       {
-        "department": "Administration",
-        "AVG(salary)": <<some value>>,
-        "MIN(salary)": <<some value>>,
-        "MAX(salary)": <<some value>>,
-      },
-      {
-        "department": "Banking",
-        "AVG(salary)": <<some value>>,
-        "MIN(salary)": <<some value>>,
-        "MAX(salary)": <<some value>>,
-      },
-      {
-        "department": "Engineering",
-        "AVG(salary)": <<some value>>,
-        "MIN(salary)": <<some value>>,
-        "MAX(salary)": <<some value>>,
-      },
-      {
-        "department": "Operations",
-        "AVG(salary)": <<some value>>,
-        "MIN(salary)": <<some value>>,
-        "MAX(salary)": <<some value>>,
-      }
-    ]
-  }
-  ```
-
-  using POSTMAN
-  ![](./images/local-response.png)
-  Expected Output:
-  ![](./images/local-response.png)
-
-  - A `GET` on `/statistics/sub_department` which returns a json object of mean min and max salaries for sub departments grouped by department
-
-  ```
-  curl --location --request GET 'http://localhost:3000/api/staff/statistics/sub_department' \
-  --header 'token: << your api token >>' \
-  ```
-
-  Expected Output Format:
-
-  ```json
-  {
-    "body": {
-      "department": {
-        "sub_department": {
-          "name": <<some name>>,
+          "on_contract": "false",
           "AVG(salary)": <<some value>>,
           "MIN(salary)": <<some value>>,
           "MAX(salary)": <<some value>>,
-        }
+      },
+      {
+          "on_contract": "true",
+          "AVG(salary)": <<some value>>,
+          "MIN(salary)": <<some value>>,
+          "MAX(salary)": <<some value>>,
+      }
+  ]
+}
+```
+
+- A `GET` on `/statistics/department` which returns a json object of mean min and max salaries grouped by department
+
+```
+ curl --location --request GET 'http://localhost:3000/api/staff/statistics/department' \
+--header 'token: << your api token >>' \
+```
+
+using POSTMAN
+![](./staff/public/images/how-to-get-salary-stats-by-department.jpg)
+
+Expected Output:
+
+```json
+{
+  "body": [
+    {
+      "department": "Administration",
+      "AVG(salary)": <<some value>>,
+      "MIN(salary)": <<some value>>,
+      "MAX(salary)": <<some value>>,
+    },
+    {
+      "department": "Banking",
+      "AVG(salary)": <<some value>>,
+      "MIN(salary)": <<some value>>,
+      "MAX(salary)": <<some value>>,
+    },
+    {
+      "department": "Engineering",
+      "AVG(salary)": <<some value>>,
+      "MIN(salary)": <<some value>>,
+      "MAX(salary)": <<some value>>,
+    },
+    {
+      "department": "Operations",
+      "AVG(salary)": <<some value>>,
+      "MIN(salary)": <<some value>>,
+      "MAX(salary)": <<some value>>,
+    }
+  ]
+}
+```
+
+- A `GET` on `/statistics/sub_department` which returns a json object of mean min and max salaries for sub departments grouped by department
+
+```
+curl --location --request GET 'http://localhost:3000/api/staff/statistics/sub_department' \
+--header 'token: << your api token >>' \
+```
+
+Expected Output Format:
+
+```json
+{
+  "body": {
+    "department": {
+      "sub_department": {
+        "name": <<some name>>,
+        "AVG(salary)": <<some value>>,
+        "MIN(salary)": <<some value>>,
+        "MAX(salary)": <<some value>>,
       }
     }
   }
-  ```
+}
+```
 
 using POSTMAN
-![](./images/local-response.png)
-Expected Output:
-![](./images/local-response.png)
+![](./staff/public/images/how-to-get-salary-stats-by-department.jpg)
 
 ```
 
