@@ -23,7 +23,7 @@ let mocks = {
 };
 process.env.TOKEN_SECRET = mocks.TOKEN_SECRET;
 
-describe("User Route", () => {
+describe("User Api Route", () => {
   describe.skip("Get Route", () => {
     it("should return 200 status code ", async () => {
       const res = await request(app).get("/");
