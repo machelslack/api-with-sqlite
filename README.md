@@ -76,6 +76,11 @@ npm run start
 
 From the root of the project cd into staff directory.
 
+```
+cd staff
+
+```
+
 First you will need to build the image using the below command
 
 ```
