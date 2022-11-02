@@ -1,7 +1,9 @@
 const { authenticateToken } = require("./authentication");
 const jwt = require("jsonwebtoken");
 
-const jwtverifyMock = jest.fn().mockReturnedValue("a-token");
+jest.mock("jsonwebtoken", () => ({
+  verify: jest.fn().mockReturnValue("a-token"),
+}));
 
 const mocks = {
   requestMock: {
@@ -19,25 +21,19 @@ const mocks = {
     json: jest.fn(),
   },
   nextMock: jest.fn(),
-  jwtMockCallback: (err, user) => {},
   TOKEN_SECRET: "xxx",
-  username: "johndoe",
-  expiry: { expiresIn: "1800s" },
 };
 
-let verifyMock = jest.spyOn(jwt, "verify");
-
-jest.mock("jwtverifyMock", () => ({
-  default: {
-    verify: jest.fn(),
-  },
-}));
-
-describe.skip("Authentication Middleware", () => {
+describe("Authentication Middleware", () => {
   beforeAll(() => {
     process.env.TOKEN_SECRET = mocks.TOKEN_SECRET;
   });
-  it("should return sucess response message", () => {
+  it("should authenticate user sucess response message", () => {
     authenticateToken(mocks.requestMock, mocks.responseMock, mocks.nextMock);
+    expect(jwt.verify).toBeCalledWith(
+      mocks.requestMock.headers.token,
+      mocks.TOKEN_SECRET,
+      expect.anything()
+    );
   });
 });
