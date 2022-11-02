@@ -77,8 +77,6 @@ router.post("/", async function (req, res) {
 
   const [valid] = validateFormInputInBody(body);
 
-  console.log("Validating body...");
-
   if (!valid) {
     buildJsonReponse({ error: "Bad Request", status: 400, res });
     return;

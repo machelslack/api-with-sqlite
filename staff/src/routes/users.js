@@ -15,8 +15,6 @@ router.post("/", function (req, res, next) {
 
   const [valid] = validateUserNameInBody(body);
 
-  console.log("Validating body...", JSON.stringify(body));
-
   if (!valid) {
     buildJsonReponse({ error: "Bad Request", status: 400, res });
     return;

@@ -14,8 +14,10 @@ const addRecord = (
         if (err) {
           reject(err);
         }
-
-        resolve({ message: `${this.lastID} has been inserted`, rows });
+        resolve({
+          message: `Record Id ${this.lastID} has been inserted`,
+          rows,
+        });
       }
     );
   });
