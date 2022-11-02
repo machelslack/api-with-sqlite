@@ -17,6 +17,24 @@ This repository is a basic application that demonstartes how to create a sqlite 
 - JSON web token
 - Docker
 
+Setup & Prerequisites
+
+### Create Docker Hub account
+
+Sign up for a Free docker hub account by [clicking here](https://hub.docker.com/signup).
+
+### Install Docker Desktop
+
+Next you will need to install Docker Desktop, to do this visit https://www.docker.com/products/docker-desktop/ and follow the instructions for your OS.
+
+Once installed ensure docker desktop is running, on mac you should see the docker logo (whale with containers on its back) in your task bar on the top of your screen, when you hover your mouse over it, it should show you the status of docker, this should be `Docker Desktop is Running`.
+
+Execute below command to confirm the docker is running:
+
+```
+docker --version
+```
+
 ## Running the App locally
 
 Clone the repository to your workspace and open the codebase in an IDE of your choice.

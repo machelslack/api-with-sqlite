@@ -1,4 +1,4 @@
-const authenticateToken = require("./authentication");
+const { authenticateToken } = require("./authentication");
 const jwt = require("jsonwebtoken");
 
 const jwtverifyMock = jest.fn().mockReturnedValue("a-token");

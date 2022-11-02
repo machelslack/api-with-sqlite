@@ -1,111 +1,20 @@
 const express = require("express");
-const { database, addRecord } = require("../store/database");
-const { buildJsonReponse } = require("../helpers");
+const {
+  database,
+  addRecord,
+  deleteRecord,
+  getStatsByContract,
+  getStatsByDepartment,
+  getStatsBySubDepartment,
+} = require("../store/database");
+const { buildJsonReponse, validateFormInputInBody } = require("../helpers");
 
 const router = express.Router();
-
-const validateBody = (body) => {
-  if (!("name" in body)) {
-    return [false];
-  }
-
-  if (!("salary" in body)) {
-    return [false];
-  }
-
-  if (!("currency" in body)) {
-    return [false];
-  }
-
-  if (!("on_contract" in body)) {
-    return [false];
-  }
-
-  if (!("department" in body)) {
-    return [false];
-  }
-
-  if (!("sub_department" in body)) {
-    return [false];
-  }
-
-  return [true];
-};
-
-const deleteRecord = (staffId) =>
-  new Promise((resolve, reject) => {
-    database.run(
-      `DELETE FROM Staff WHERE id = ${staffId}`,
-      function (err, records) {
-        if (err) {
-          reject(err);
-        }
-        resolve({ message: `${this.changes} row deleted`, records });
-      }
-    );
-  });
-
-const getSumStatsByContract = () => {
-  return new Promise((resolve, reject) => {
-    database.all(
-      "SELECT on_contract, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY on_contract",
-      (err, records) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({ records });
-      }
-    );
-  });
-};
-
-const getSumStatsByDepartment = () => {
-  return new Promise((resolve, reject) => {
-    database.all(
-      "SELECT department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY department",
-      (err, records) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({ records });
-      }
-    );
-  });
-};
-
-const getSumStatsBySubDepartment = () => {
-  return new Promise((resolve, reject) => {
-    database.all(
-      "SELECT department, sub_department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY sub_department",
-      (err, records) => {
-        if (err) {
-          reject(err);
-        }
-        resolve({
-          records: records.map((row) => {
-            const {
-              department = `${department}`,
-              sub_department,
-              ...rest
-            } = row;
-            return {
-              department: department,
-              sub_department: {
-                name: sub_department,
-                ...rest,
-              },
-            };
-          }),
-        });
-      }
-    );
-  });
-};
 
 router.get("/statistics/:facet", async function (req, res) {
   const facet = req.params.facet;
   if (facet === "on_contract") {
-    await getSumStatsByContract()
+    await getStatsByContract(database)
       .then(({ records }) => {
         buildJsonReponse({ res, body: records });
       })
@@ -119,7 +28,7 @@ router.get("/statistics/:facet", async function (req, res) {
   }
 
   if (facet === "department") {
-    await getSumStatsByDepartment()
+    await getStatsByDepartment(database)
       .then(({ records }) => {
         buildJsonReponse({ res, body: records });
       })
@@ -133,11 +42,24 @@ router.get("/statistics/:facet", async function (req, res) {
   }
 
   if (facet === "sub_department") {
-    await getSumStatsBySubDepartment()
+    await getStatsBySubDepartment(database)
       .then(({ records }) => {
         buildJsonReponse({
           res,
-          body: records,
+          body: records.map((row) => {
+            const {
+              department = `${department}`,
+              sub_department,
+              ...rest
+            } = row;
+            return {
+              department: department,
+              sub_department: {
+                name: sub_department,
+                ...rest,
+              },
+            };
+          }),
         });
       })
       .catch((err) => {
@@ -153,7 +75,7 @@ router.get("/statistics/:facet", async function (req, res) {
 router.post("/", async function (req, res) {
   let body = req.body;
 
-  const [valid] = validateBody(body);
+  const [valid] = validateFormInputInBody(body);
 
   console.log("Validating body...");
 
@@ -184,9 +106,13 @@ router.delete("/:staffId", async function (req, res) {
   }
 
   if (req.method === "DELETE") {
-    await deleteRecord(staffId)
+    await deleteRecord(database, staffId)
       .then(({ message, records }) => {
-        buildJsonReponse({ res, body: records, message });
+        buildJsonReponse({
+          res,
+          body: records,
+          message,
+        });
       })
       .catch((err) => {
         buildJsonReponse({

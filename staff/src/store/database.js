@@ -41,7 +41,63 @@ const database = new sqlite3.Database("staff.db", (err) => {
   createTables(database);
 });
 
+const deleteRecord = (databaseClient, staffId) =>
+  new Promise((resolve, reject) => {
+    databaseClient.run(
+      `DELETE FROM Staff WHERE id = ${staffId}`,
+      function (err, records) {
+        if (err) {
+          reject(err);
+        }
+        resolve({ message: `${this.changes} row deleted`, records });
+      }
+    );
+  });
+
+const getStatsByContract = (databaseClient) =>
+  new Promise((resolve, reject) => {
+    databaseClient.all(
+      "SELECT on_contract, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY on_contract",
+      (err, records) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({ records });
+      }
+    );
+  });
+
+const getStatsByDepartment = (databaseClient) =>
+  new Promise((resolve, reject) => {
+    databaseClient.all(
+      "SELECT department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY department",
+      (err, records) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({ records });
+      }
+    );
+  });
+
+const getStatsBySubDepartment = (databaseClient) =>
+  new Promise((resolve, reject) => {
+    databaseClient.all(
+      "SELECT department, sub_department, AVG(salary), MIN(salary), MAX(salary) FROM Staff GROUP BY sub_department",
+      (err, records) => {
+        if (err) {
+          reject(err);
+        }
+        resolve({ records });
+      }
+    );
+  });
+
 module.exports = {
   database,
   addRecord,
+  deleteRecord,
+  getStatsByContract,
+  getStatsByDepartment,
+  getStatsBySubDepartment,
 };
